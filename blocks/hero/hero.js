@@ -17,27 +17,27 @@ export default function decorate(block) {
     content.append(heading);
   }
 
-  // Move remaining authored content into the content wrapper.
-  [...block.querySelectorAll('p, a')].forEach((element) => {
-    if (
-      element.contains(picture)
-      || element.contains(heading)
-      || element.closest('.hero-content')
-      || element.closest('.hero-image')
-    ) {
+  // Move remaining authored content, including description and CTA wrappers.
+  [...block.children].forEach((child) => {
+    if (child.contains(heading) || child.contains(picture)) {
+      // Preserve any text or CTA content alongside the image/heading.
+      [...child.childNodes].forEach((node) => {
+        if (
+          node !== heading
+          && node !== picture
+          && !(node.nodeType === Node.TEXT_NODE && !node.textContent.trim())
+        ) {
+          content.append(node);
+        }
+      });
       return;
     }
 
-    content.append(element);
+    content.append(child);
   });
 
   block.replaceChildren();
 
-  if (picture) {
-    block.append(imageWrapper);
-  }
-
-  if (content.children.length) {
-    block.append(content);
-  }
+  if (picture) block.append(imageWrapper);
+  if (content.children.length) block.append(content);
 }
